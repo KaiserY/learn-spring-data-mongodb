@@ -1,9 +1,7 @@
 package com.kaisery.fs.entity;
 
 
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -13,19 +11,37 @@ import java.util.List;
 public class Resource {
 
     @Id
-    private ObjectId id = new ObjectId();
+    private String id;
+
+    private String identity;
 
     private String type;
 
     private String name;
 
+    private UserBrief owner;
+
     private LocalDateTime lastModifiedTime;
 
-    @DBRef
-    private Folder parent;
+    private FolderBrief parent;
 
-    @DBRef
-    private List<Folder> path;
+    private List<FolderBrief> path;
+
+    public String getIdentity() {
+        return identity;
+    }
+
+    public void setIdentity(String identity) {
+        this.identity = identity;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String getName() {
         return name;
@@ -33,6 +49,14 @@ public class Resource {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public UserBrief getOwner() {
+        return owner;
+    }
+
+    public void setOwner(UserBrief owner) {
+        this.owner = owner;
     }
 
     public LocalDateTime getLastModifiedTime() {
@@ -43,27 +67,27 @@ public class Resource {
         this.lastModifiedTime = lastModifiedTime;
     }
 
-    public Folder getParent() {
+    public FolderBrief getParent() {
         return parent;
     }
 
-    public void setParent(Folder parent) {
+    public void setParent(FolderBrief parent) {
         this.parent = parent;
     }
 
-    public List<Folder> getPath() {
+    public List<FolderBrief> getPath() {
         return path;
     }
 
-    public void setPath(List<Folder> path) {
+    public void setPath(List<FolderBrief> path) {
         this.path = path;
     }
 
-    public String getType() {
-        return type;
+    public String getId() {
+        return id;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setId(String id) {
+        this.id = id;
     }
 }

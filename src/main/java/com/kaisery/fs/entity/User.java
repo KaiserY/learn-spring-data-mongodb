@@ -1,22 +1,27 @@
 package com.kaisery.fs.entity;
 
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDateTime;
 
 @Document
 public class User {
 
     @Id
-    private ObjectId id = new ObjectId();
+    private String id;
 
     private String userName;
 
     private String password;
 
-    @DBRef
-    private Folder rootFolder;
+    private String token;
+
+    private Long space;
+
+    private LocalDateTime createdTime;
+
+    private FolderBrief rootFolder;
 
     public String getUserName() {
         return userName;
@@ -34,11 +39,43 @@ public class User {
         this.password = password;
     }
 
-    public Folder getRootFolder() {
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public Long getSpace() {
+        return space;
+    }
+
+    public void setSpace(Long space) {
+        this.space = space;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(LocalDateTime createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public FolderBrief getRootFolder() {
         return rootFolder;
     }
 
-    public void setRootFolder(Folder rootFolder) {
+    public void setRootFolder(FolderBrief rootFolder) {
         this.rootFolder = rootFolder;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
