@@ -10,6 +10,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -35,6 +39,9 @@ public class HelloWorldTest {
     private UserRepository userRepository;
 
     @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
     private ResourceRepository resourceRepository;
 
     @Test
@@ -45,7 +52,10 @@ public class HelloWorldTest {
     }
 
     @Test
-    public void insertTest() throws Exception {
+    public void insertByTemplateTest() throws Exception {
+
+        userRepository.deleteAll();
+        resourceRepository.deleteAll();
 
         Queue<File> files = new ConcurrentLinkedQueue<File>();
 
@@ -55,8 +65,6 @@ public class HelloWorldTest {
         user.setPassword("12345678");
         user.setSpace(315641556L);
         user.setCreatedTime(LocalDateTime.now());
-
-        userRepository.save(user);
 
         UserBrief userBrief = new UserBrief();
         userBrief.setUserName(user.getUserName());
@@ -69,8 +77,6 @@ public class HelloWorldTest {
         rootFolder.setLastModifiedTime(LocalDateTime.now());
         rootFolder.setOwner(userBrief);
         rootFolder.setChild(new ArrayList<ResourceBrief>());
-
-        resourceRepository.save(rootFolder);
 
         FolderBrief rootFolderBrief = new FolderBrief();
         rootFolderBrief.setId(rootFolder.getId());
@@ -87,8 +93,6 @@ public class HelloWorldTest {
             folder.setChild(new ArrayList<ResourceBrief>());
             folder.setParent(rootFolderBrief);
             folder.setPath(Collections.singletonList(rootFolderBrief));
-
-            resourceRepository.save(folder);
 
             FolderBrief folderBrief = new FolderBrief();
             folderBrief.setId(folder.getId());
@@ -118,7 +122,94 @@ public class HelloWorldTest {
                     file.getVersions().add(fileVersion);
                 }
 
-                files.add(file);
+                mongoTemplate.insert(file, "resource");
+
+                FileBrief fileBrief = new FileBrief();
+                fileBrief.setId(file.getId());
+                fileBrief.setName(file.getName());
+
+                folder.getChild().add(fileBrief);
+            }
+
+            mongoTemplate.insert(folder, "resource");
+        }
+
+        mongoTemplate.insert(rootFolder, "resource");
+        mongoTemplate.insert(user, "user");
+    }
+
+    @Test
+    public void insertByRepositoryTest() throws Exception {
+
+        userRepository.deleteAll();
+        resourceRepository.deleteAll();
+
+        Queue<File> files = new ConcurrentLinkedQueue<File>();
+
+        User user = new User();
+        user.setId(new ObjectId().toString());
+        user.setUserName("user");
+        user.setPassword("12345678");
+        user.setSpace(315641556L);
+        user.setCreatedTime(LocalDateTime.now());
+
+        UserBrief userBrief = new UserBrief();
+        userBrief.setUserName(user.getUserName());
+        userBrief.setToken(user.getToken());
+        userBrief.setId(user.getId());
+
+        Folder rootFolder = new Folder();
+        rootFolder.setId(new ObjectId().toString());
+        rootFolder.setName("user root folder");
+        rootFolder.setLastModifiedTime(LocalDateTime.now());
+        rootFolder.setOwner(userBrief);
+        rootFolder.setChild(new ArrayList<ResourceBrief>());
+
+        FolderBrief rootFolderBrief = new FolderBrief();
+        rootFolderBrief.setId(rootFolder.getId());
+        rootFolderBrief.setName(rootFolder.getName());
+
+        user.setRootFolder(rootFolderBrief);
+
+        for (int i = 1; i <= 1000; i++) {
+            Folder folder = new Folder();
+            folder.setId(new ObjectId().toString());
+            folder.setName("user folder " + i);
+            folder.setLastModifiedTime(LocalDateTime.now());
+            folder.setOwner(userBrief);
+            folder.setChild(new ArrayList<ResourceBrief>());
+            folder.setParent(rootFolderBrief);
+            folder.setPath(Collections.singletonList(rootFolderBrief));
+
+            FolderBrief folderBrief = new FolderBrief();
+            folderBrief.setId(folder.getId());
+            folderBrief.setName(folder.getName());
+
+            rootFolder.getChild().add(folderBrief);
+
+            for (int j = 1; j <= 1000; j++) {
+                File file = new File();
+                file.setId(new ObjectId().toString());
+                file.setName("user folder " + i + " file " + j);
+                file.setOwner(userBrief);
+                file.setLastModifiedTime(LocalDateTime.now());
+                file.setParent(folderBrief);
+                file.setPath(Arrays.asList(rootFolderBrief, folderBrief));
+                file.setMaxVersion(9);
+                file.setVersions(new ArrayList<FileVersion>());
+
+                for (int k = 0; k < 10; k++) {
+                    FileVersion fileVersion = new FileVersion();
+                    fileVersion.setCreatedTime(LocalDateTime.now());
+                    fileVersion.setCurrentVersion(false);
+                    fileVersion.setDescription("user folder " + i + " file " + j + " version " + k);
+                    fileVersion.setInsertedTime(LocalDateTime.now());
+                    fileVersion.setLastModifiedTime(LocalDateTime.now());
+
+                    file.getVersions().add(fileVersion);
+                }
+
+                resourceRepository.save(file);
 
                 FileBrief fileBrief = new FileBrief();
                 fileBrief.setId(file.getId());
@@ -132,9 +223,25 @@ public class HelloWorldTest {
 
         resourceRepository.save(rootFolder);
         userRepository.save(user);
+    }
 
-        for (File file : files) {
-            resourceRepository.save(file);
+    @Test
+    public void updateByRepositoryTest() throws Exception {
+        for (int i = 1; i <= 100; i++) {
+            for (int j = 1; j <= 100; j++) {
+                File file = (File) resourceRepository.findByName("user folder " + i + " file " + j);
+            }
+        }
+    }
+
+    @Test
+    public void updateByTemplateTest() throws Exception {
+        for (int i = 1; i <= 100; i++) {
+            for (int j = 1; j <= 100; j++) {
+                Query query = new Query(Criteria.where("name").is("user folder " + i + " file " + j));
+                Update update = new Update().set("maxVersion", 9);
+                File file = mongoTemplate.findAndModify(query, update, File.class);
+            }
         }
     }
 }

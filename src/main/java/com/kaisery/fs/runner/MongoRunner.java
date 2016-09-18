@@ -17,7 +17,5 @@ public class MongoRunner implements CommandLineRunner {
 
     @Override
     public void run(String... strings) throws Exception {
-        userRepository.deleteAll();
-        resourceRepository.deleteAll();
     }
 }
