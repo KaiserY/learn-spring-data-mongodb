@@ -1,6 +1,5 @@
 package com.kaisery.fs.repository;
 
-import com.kaisery.fs.entity.Folder;
 import com.kaisery.fs.entity.Resource;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
