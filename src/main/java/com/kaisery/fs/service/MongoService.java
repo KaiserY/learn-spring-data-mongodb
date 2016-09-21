@@ -1,6 +1,7 @@
 package com.kaisery.fs.service;
 
 import com.kaisery.fs.entity.File;
+import com.kaisery.fs.entity.Resource;
 import com.kaisery.fs.repository.ResourceRepository;
 import com.kaisery.fs.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 @Service
@@ -36,14 +38,14 @@ public class MongoService {
     public Future<Void> doQuery(String text) {
         Query query = new Query(Criteria.where("name").is(text));
         Update update = new Update().set("maxVersion", 9);
-        mongoTemplate.findAndModify(query, update, File.class);
+        mongoTemplate.findAndModify(query, update, Resource.class);
         return new AsyncResult<Void>(null);
     }
 
     @Async
     public Future<Void> doFind(String text) {
         Query query = new Query(Criteria.where("name").is(text));
-        mongoTemplate.find(query, File.class);
+        List<Resource> resources = mongoTemplate.find(query, Resource.class);
         return new AsyncResult<Void>(null);
     }
 }

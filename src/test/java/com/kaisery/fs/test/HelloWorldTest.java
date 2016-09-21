@@ -20,10 +20,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.StopWatch;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.Future;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -93,7 +90,7 @@ public class HelloWorldTest {
 
         user.setRootFolder(rootFolderBrief);
 
-        for (int i = 1; i <= 1000; i++) {
+        for (int i = 1; i <= 100; i++) {
             Folder folder = new Folder();
             folder.setId(new ObjectId().toString());
             folder.setName("user folder " + i);
@@ -109,7 +106,7 @@ public class HelloWorldTest {
 
             rootFolder.getChild().add(folderBrief);
 
-            for (int j = 1; j <= 100; j++) {
+            for (int j = 1; j <= 1000; j++) {
                 File file = new File();
                 file.setId(new ObjectId().toString());
                 file.setName("user folder " + i + " file " + j);
@@ -131,8 +128,8 @@ public class HelloWorldTest {
                     file.getVersions().add(fileVersion);
                 }
 
-//                futures.add(mongoService.insertDocument(file, "resource", file.getName()));
-                mongoTemplate.insert(file, "resource");
+                futures.add(mongoService.insertDocument(file, "resource", file.getName()));
+//                mongoTemplate.insert(file, "resource");
 
                 FileBrief fileBrief = new FileBrief();
                 fileBrief.setId(file.getId());
@@ -169,17 +166,27 @@ public class HelloWorldTest {
 
     @Test
     public void findByRepositoryTest() throws Exception {
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
         Collection<Future<Void>> futures = new ArrayList<Future<Void>>();
 
         for (int i = 1; i <= 100; i++) {
             for (int j = 1; j <= 1000; j++) {
                 futures.add(mongoService.doFind("user folder " + i + " file " + j));
+//                Query query = new Query(Criteria.where("name").is("user folder " + i + " file " + j));
+//                List<Resource> resources = mongoTemplate.find(query, Resource.class);
             }
         }
 
         for (Future<Void> future : futures) {
             future.get();
         }
+
+        stopWatch.stop();
+
+        System.out.println(stopWatch.getTotalTimeMillis());
     }
 
     @Test
