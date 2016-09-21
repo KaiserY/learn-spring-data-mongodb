@@ -36,7 +36,14 @@ public class MongoService {
     public Future<Void> doQuery(String text) {
         Query query = new Query(Criteria.where("name").is(text));
         Update update = new Update().set("maxVersion", 9);
-        File file = mongoTemplate.findAndModify(query, update, File.class);
+        mongoTemplate.findAndModify(query, update, File.class);
+        return new AsyncResult<Void>(null);
+    }
+
+    @Async
+    public Future<Void> doFind(String text) {
+        Query query = new Query(Criteria.where("name").is(text));
+        mongoTemplate.find(query, File.class);
         return new AsyncResult<Void>(null);
     }
 }

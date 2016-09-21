@@ -89,7 +89,7 @@ public class HelloWorldTest {
 
         user.setRootFolder(rootFolderBrief);
 
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= 1000; i++) {
             Folder folder = new Folder();
             folder.setId(new ObjectId().toString());
             folder.setName("user folder " + i);
@@ -105,7 +105,7 @@ public class HelloWorldTest {
 
             rootFolder.getChild().add(folderBrief);
 
-            for (int j = 1; j <= 1000; j++) {
+            for (int j = 1; j <= 100; j++) {
                 File file = new File();
                 file.setId(new ObjectId().toString());
                 file.setName("user folder " + i + " file " + j);
@@ -135,16 +135,11 @@ public class HelloWorldTest {
 
                 folder.getChild().add(fileBrief);
             }
-
-//            mongoService.insertDocument(folder, "resource");
         }
 
         for (Future<String> future : futures) {
             future.get();
         }
-
-//        mongoService.insertDocument(rootFolder, "resource");
-//        mongoService.insertDocument(user, "user");
     }
 
     @Test
@@ -161,5 +156,25 @@ public class HelloWorldTest {
         for (Future<Void> future : futures) {
             future.get();
         }
+    }
+
+    @Test
+    public void findByRepositoryTest() throws Exception {
+        Collection<Future<Void>> futures = new ArrayList<Future<Void>>();
+
+        for (int i = 1; i <= 100; i++) {
+            for (int j = 1; j <= 1000; j++) {
+                futures.add(mongoService.doFind("user folder " + i + " file " + j));
+            }
+        }
+
+        for (Future<Void> future : futures) {
+            future.get();
+        }
+    }
+
+    @Test
+    public void findByMaxVersionTest() throws Exception {
+        resourceRepository.findByMaxVersion(9);
     }
 }
