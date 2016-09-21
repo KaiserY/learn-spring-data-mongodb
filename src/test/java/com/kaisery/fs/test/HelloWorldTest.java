@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.util.StopWatch;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -61,6 +62,9 @@ public class HelloWorldTest {
 
         userRepository.deleteAll();
         resourceRepository.deleteAll();
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
 
         Collection<Future<java.lang.String>> futures = new ArrayList<Future<String>>();
 
@@ -127,7 +131,8 @@ public class HelloWorldTest {
                     file.getVersions().add(fileVersion);
                 }
 
-                futures.add(mongoService.insertDocument(file, "resource", file.getName()));
+//                futures.add(mongoService.insertDocument(file, "resource", file.getName()));
+                mongoTemplate.insert(file, "resource");
 
                 FileBrief fileBrief = new FileBrief();
                 fileBrief.setId(file.getId());
@@ -140,6 +145,10 @@ public class HelloWorldTest {
         for (Future<String> future : futures) {
             future.get();
         }
+
+        stopWatch.stop();
+
+        System.out.println(stopWatch.getTotalTimeMillis());
     }
 
     @Test
